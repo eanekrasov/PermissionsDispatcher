@@ -143,10 +143,12 @@ abstract class KotlinBaseProcessorUnit : KtProcessorUnit {
         }
 
         // Add the conditional for when permission has already been granted
-        val needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission::class.java).value[0]
+        val needsPermissionAnnotation = needsMethod.getAnnotation(NeedsPermission::class.java)
+        val needsPermissionParameter = needsPermissionAnnotation.value[0]
+        val isAllPermissionsRequired = needsPermissionAnnotation.isAllRequired
         val activity = getActivityName()
         addWithCheckBodyMap[needsPermissionParameter]?.addHasSelfPermissionsCondition(builder, activity, permissionField)
-                ?: builder.beginControlFlow("if (%T.hasSelfPermissions(%L, *%N))", permissionUtils, activity, permissionField)
+                ?: builder.beginControlFlow("if (%T.hasSelfPermissions(%L, %L, *%N))", permissionUtils, activity, isAllPermissionsRequired, permissionField)
         builder.addCode(CodeBlock.builder()
                 .add("%N(", needsMethod.simpleString())
                 .add(varargsKtParametersCodeBlock(needsMethod))
@@ -316,13 +318,14 @@ abstract class KotlinBaseProcessorUnit : KtProcessorUnit {
     private fun addResultCaseBody(builder: FunSpec.Builder, needsMethod: ExecutableElement, rpe: RuntimePermissionsElement, grantResultsParam: String) {
         val onDenied = rpe.findOnDeniedForNeeds(needsMethod)
         val hasDenied = onDenied != null
+        val isAllPermissionsRequired = needsMethod.getAnnotation(NeedsPermission::class.java).isAllRequired
         val needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission::class.java).value[0]
         val permissionField = permissionFieldName(needsMethod)
 
         // Add the conditional for "permission verified"
         val activity = getActivityName()
         addWithCheckBodyMap[needsPermissionParameter]?.addHasSelfPermissionsCondition(builder, activity, permissionField)
-                ?: builder.beginControlFlow("if (%T.verifyPermissions(*%N))", permissionUtils, grantResultsParam)
+                ?: builder.beginControlFlow("if (%T.verifyPermissions(%L, *%N))", permissionUtils, isAllPermissionsRequired, grantResultsParam)
 
         val onRationale = rpe.findOnRationaleForNeeds(needsMethod)
         val hasOnRationaleParams = onRationale?.parameters?.isNotEmpty() ?: true
@@ -333,7 +336,7 @@ abstract class KotlinBaseProcessorUnit : KtProcessorUnit {
                 builder.addStatement("%N?.grant()", pendingField)
             } else {
                 addWithCheckBodyMap[needsPermissionParameter]?.addHasSelfPermissionsCondition(builder, activity, permissionField)
-                        ?: builder.beginControlFlow("if (%T.hasSelfPermissions(%L, *%N))", permissionUtils, activity, permissionField)
+                        ?: builder.beginControlFlow("if (%T.hasSelfPermissions(%L, %L, *%N))", permissionUtils, activity, isAllPermissionsRequired, permissionField)
                 builder.addCode(CodeBlock.builder()
                         .add("%N(", needsMethod.simpleString())
                         .add(varargsKtParametersCodeBlock(needsMethod, withCache = true))

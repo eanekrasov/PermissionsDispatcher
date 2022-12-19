@@ -157,7 +157,7 @@ public class ApiLevelTestSuite {
             // below the minimum available level. For all other API levels, the permission
             // shouldn't be auto-granted.
             boolean shouldAutoGrantPermission = apiLevel < permissionMinLevel;
-            boolean hasPermission = PermissionUtils.hasSelfPermissions(mockContext, permission);
+            boolean hasPermission = PermissionUtils.hasSelfPermissions(mockContext, true, permission);
 
             if (shouldAutoGrantPermission != hasPermission) {
                 // Mismatch, because the permission shouldn't be granted because the API level requires a check,

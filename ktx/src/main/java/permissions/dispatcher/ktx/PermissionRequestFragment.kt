@@ -41,7 +41,7 @@ internal sealed class PermissionRequestFragment : Fragment() {
             if (requestCode == this.requestCode) {
                 // https://github.com/permissions-dispatcher/PermissionsDispatcher/issues/729
                 val key = permissions.sortedArray().contentToString()
-                if (verifyPermissions(*grantResults)) {
+                if (verifyPermissions(true, *grantResults)) {
                     viewModel.postPermissionRequestResult(key, PermissionResult.GRANTED)
                 } else {
                     if (!PermissionUtils.shouldShowRequestPermissionRationale(this, *permissions)) {

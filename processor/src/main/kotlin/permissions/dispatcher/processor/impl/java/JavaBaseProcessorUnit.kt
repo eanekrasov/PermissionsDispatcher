@@ -156,10 +156,12 @@ abstract class JavaBaseProcessorUnit : JavaProcessorUnit {
         }
 
         // Add the conditional for when permission has already been granted
-        val needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission::class.java).value[0]
+        val needsPermissionAnnotation = needsMethod.getAnnotation(NeedsPermission::class.java)
+        val needsPermissionParameter = needsPermissionAnnotation.value[0]
+        val isAllPermissionsRequired = needsPermissionAnnotation.isAllRequired
         val activityVar = getActivityName(targetParam)
         addWithCheckBodyMap[needsPermissionParameter]?.addHasSelfPermissionsCondition(builder, activityVar, permissionField)
-                ?: builder.beginControlFlow("if (\$T.hasSelfPermissions(\$N, \$N))", permissionUtils, activityVar, permissionField)
+                ?: builder.beginControlFlow("if (\$T.hasSelfPermissions(\$N, \$L, \$N))", permissionUtils, activityVar, isAllPermissionsRequired, permissionField)
         builder.addCode(CodeBlock.builder()
                 .add("\$N.\$N(", targetParam, needsMethod.simpleString())
                 .add(varargsParametersCodeBlock(needsMethod))
@@ -304,12 +306,14 @@ abstract class JavaBaseProcessorUnit : JavaProcessorUnit {
     private fun addResultCaseBody(builder: MethodSpec.Builder, needsMethod: ExecutableElement, rpe: RuntimePermissionsElement, targetParam: String, grantResultsParam: String) {
         val onDenied = rpe.findOnDeniedForNeeds(needsMethod)
         val hasDenied = onDenied != null
-        val needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission::class.java).value[0]
+        val needsPermissionAnnotation = needsMethod.getAnnotation(NeedsPermission::class.java)
+        val needsPermissionParameter = needsPermissionAnnotation.value[0]
+        val isAllPermissionsRequired = needsPermissionAnnotation.isAllRequired
         val permissionField = permissionFieldName(needsMethod)
 
         // Add the conditional for "permission verified"
         addWithCheckBodyMap[needsPermissionParameter]?.addHasSelfPermissionsCondition(builder, getActivityName(targetParam), permissionField)
-                ?: builder.beginControlFlow("if (\$T.verifyPermissions(\$N))", permissionUtils, grantResultsParam)
+                ?: builder.beginControlFlow("if (\$T.verifyPermissions(\$L, \$N))", permissionUtils, isAllPermissionsRequired, grantResultsParam)
 
         // Based on whether or not the method has parameters, delegate to the "pending request" object or invoke the method directly
         val onRationale = rpe.findOnRationaleForNeeds(needsMethod)

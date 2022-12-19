@@ -14,4 +14,6 @@ public @interface NeedsPermission {
     String[] value();
 
     int maxSdkVersion() default 0;
+
+    boolean isAllRequired() default true;
 }

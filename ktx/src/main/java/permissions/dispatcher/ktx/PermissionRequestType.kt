@@ -9,7 +9,7 @@ import permissions.dispatcher.PermissionUtils.hasSelfPermissions
 internal sealed class PermissionRequestType {
     object Normal : PermissionRequestType() {
         override fun checkPermissions(context: Context, permissions: Array<out String>): Boolean =
-            hasSelfPermissions(context, *permissions)
+            hasSelfPermissions(context, true, *permissions)
 
         override fun fragment(permissions: Array<out String>): PermissionRequestFragment =
             PermissionRequestFragment.NormalRequestPermissionFragment.newInstance(

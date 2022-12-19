@@ -593,7 +593,7 @@ class KtProcessorTestSuite {
         private val PERMISSION_SHOWCAMERA: Array<String> = arrayOf("android.permission.CAMERA")
 
         fun MyActivity.showCameraWithPermissionCheck() {
-          if (PermissionUtils.hasSelfPermissions(this, *PERMISSION_SHOWCAMERA)) {
+          if (PermissionUtils.hasSelfPermissions(this, true, *PERMISSION_SHOWCAMERA)) {
             showCamera()
           } else {
             ActivityCompat.requestPermissions(this, PERMISSION_SHOWCAMERA, REQUEST_SHOWCAMERA)
@@ -604,7 +604,7 @@ class KtProcessorTestSuite {
           when (requestCode) {
             REQUEST_SHOWCAMERA ->
              {
-              if (PermissionUtils.verifyPermissions(*grantResults)) {
+              if (PermissionUtils.verifyPermissions(true, *grantResults)) {
                 showCamera()
               }
             }
@@ -665,7 +665,7 @@ class KtProcessorTestSuite {
             arrayOf("android.permission.SYSTEM_ALERT_WINDOW")
 
         internal fun MyFragment.showCameraWithPermissionCheck() {
-          if (PermissionUtils.hasSelfPermissions(this.requireActivity(), *PERMISSION_SHOWCAMERA)) {
+          if (PermissionUtils.hasSelfPermissions(this.requireActivity(), true, *PERMISSION_SHOWCAMERA)) {
             showCamera()
           } else {
             this.requestPermissions(PERMISSION_SHOWCAMERA, REQUEST_SHOWCAMERA)
@@ -673,8 +673,8 @@ class KtProcessorTestSuite {
         }
 
         internal fun MyFragment.systemAlertWindowWithPermissionCheck() {
-          if (PermissionUtils.hasSelfPermissions(this.requireActivity(), *PERMISSION_SYSTEMALERTWINDOW) ||
-              Settings.canDrawOverlays(this.requireActivity())) {
+          if (PermissionUtils.hasSelfPermissions(this.requireActivity(), true,
+              *PERMISSION_SYSTEMALERTWINDOW) || Settings.canDrawOverlays(this.requireActivity())) {
             systemAlertWindow()
           } else {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" +
@@ -687,7 +687,7 @@ class KtProcessorTestSuite {
           when (requestCode) {
             REQUEST_SHOWCAMERA ->
              {
-              if (PermissionUtils.verifyPermissions(*grantResults)) {
+              if (PermissionUtils.verifyPermissions(true, *grantResults)) {
                 showCamera()
               }
             }
@@ -697,8 +697,8 @@ class KtProcessorTestSuite {
         internal fun MyFragment.onActivityResult(requestCode: Int) {
           when (requestCode) {
             REQUEST_SYSTEMALERTWINDOW -> {
-              if (PermissionUtils.hasSelfPermissions(this.requireActivity(), *PERMISSION_SYSTEMALERTWINDOW)
-                  || Settings.canDrawOverlays(this.requireActivity())) {
+              if (PermissionUtils.hasSelfPermissions(this.requireActivity(), true,
+                  *PERMISSION_SYSTEMALERTWINDOW) || Settings.canDrawOverlays(this.requireActivity())) {
                 systemAlertWindow()
               }
             }

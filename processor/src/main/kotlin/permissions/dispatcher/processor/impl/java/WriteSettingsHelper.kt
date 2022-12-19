@@ -10,7 +10,7 @@ class WriteSettingsHelper : SensitivePermissionInterface {
     private val uri = ClassName.get("android.net", "Uri")
 
     override fun addHasSelfPermissionsCondition(builder: MethodSpec.Builder, activityVar: String, permissionField: String) {
-        builder.beginControlFlow("if (\$T.hasSelfPermissions(\$N, \$N) || \$T.System.canWrite(\$N))", permissionUtils, activityVar, permissionField, settings, activityVar)
+        builder.beginControlFlow("if (\$T.hasSelfPermissions(\$N, true, \$N) || \$T.System.canWrite(\$N))", permissionUtils, activityVar, permissionField, settings, activityVar)
     }
 
     override fun addRequestPermissionsStatement(builder: MethodSpec.Builder, targetParam: String, activityVar: String, requestCodeField: String) {

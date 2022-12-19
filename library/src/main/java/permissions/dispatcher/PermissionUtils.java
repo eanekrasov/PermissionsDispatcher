@@ -42,16 +42,16 @@ public final class PermissionUtils {
      * @param grantResults results
      * @return returns true if all permissions have been granted.
      */
-    public static boolean verifyPermissions(int... grantResults) {
+    public static boolean verifyPermissions(Boolean isAllRequired, int... grantResults) {
         if (grantResults.length == 0) {
-            return false;
+            return !isAllRequired;
         }
         for (int result : grantResults) {
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                return false;
+            if (isAllRequired ^ (result == PackageManager.PERMISSION_GRANTED)) {
+                return !isAllRequired;
             }
         }
-        return true;
+        return isAllRequired;
     }
 
     /**
@@ -72,16 +72,17 @@ public final class PermissionUtils {
      * Returns true if the Activity or Fragment has access to all given permissions.
      *
      * @param context     context
+     * @param isAllRequired Whether all permissions are required to pass or not.
      * @param permissions permission list
      * @return returns true if the Activity or Fragment has access to all given permissions.
      */
-    public static boolean hasSelfPermissions(Context context, String... permissions) {
+    public static boolean hasSelfPermissions(Context context, Boolean isAllRequired, String... permissions) {
         for (String permission : permissions) {
-            if (permissionExists(permission) && !hasSelfPermission(context, permission)) {
-                return false;
+            if (permissionExists(permission) && (isAllRequired ^ hasSelfPermission(context, permission))) {
+                return !isAllRequired;
             }
         }
-        return true;
+        return isAllRequired;
     }
 
     /**
@@ -93,7 +94,7 @@ public final class PermissionUtils {
      * @param context    context
      * @param permission permission
      * @return true if context has access to the given permission, false otherwise.
-     * @see #hasSelfPermissions(Context, String...)
+     * @see #hasSelfPermissions(Context, Boolean, String...)
      */
     private static boolean hasSelfPermission(Context context, String permission) {
         try {
